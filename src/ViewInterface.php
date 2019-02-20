@@ -13,12 +13,10 @@ use Eos\ComView\Server\Model\Value\ViewResponse;
  */
 interface ViewInterface
 {
-
     /**
      * @param string $name
      * @param ViewRequest $request
      * @return ViewResponse
      */
-    public function create(string $name, ViewRequest $request): ViewResponse;
-
+    public function createView(string $name, ViewRequest $request): ViewResponse;
 }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Eos\ComView\Server;
 
-use Eos\ComView\Server\Exception\ServerException;
+use Eos\ComView\Server\Exception\ComViewException;
 use Eos\ComView\Server\Model\Value\ViewRequest;
 use Eos\ComView\Server\Model\Value\ViewResponse;
 
@@ -24,15 +24,15 @@ class ViewRegistry implements ViewInterface
      * @param string $name
      * @param ViewRequest $request
      * @return ViewResponse
-     * @throws ServerException
+     * @throws ComViewException
      */
-    public function create(string $name, ViewRequest $request): ViewResponse
+    public function createView(string $name, ViewRequest $request): ViewResponse
     {
         if (\array_key_exists($name, $this->views)) {
-            return $this->views[$name]->create($name, $request);
+            return $this->views[$name]->createView($name, $request);
         }
 
-        throw new ServerException('No View found :'.$name);
+        throw new ComViewException('No View found :' . $name);
     }
 
     /**
@@ -40,12 +40,10 @@ class ViewRegistry implements ViewInterface
      * @param ViewInterface $view
      * @return ViewInterface
      */
-    public function addView(string $name, ViewInterface $view): ViewInterface
+    public function add(string $name, ViewInterface $view): ViewInterface
     {
         $this->views[$name] = $view;
 
         return $this;
-
     }
-
 }

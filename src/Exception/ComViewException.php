@@ -7,7 +7,7 @@ namespace Eos\ComView\Server\Exception;
 /**
  * @author Paul Martin Gütschow <guetschow@esonewmedia.de>
  */
-class ServerException extends \Exception
+class ComViewException extends \Exception
 {
 
 

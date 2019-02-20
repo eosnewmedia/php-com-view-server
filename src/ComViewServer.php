@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Eos\ComView\Server;
 
-use Eos\ComView\Server\Exception\ServerException;
+use Eos\ComView\Server\Exception\ComViewException;
 use Eos\ComView\Server\Model\Value\CommandRequest;
 use Eos\ComView\Server\Model\Value\ViewRequest;
 use Psr\Http\Message\ResponseFactoryInterface;
@@ -38,21 +38,21 @@ class ComViewServer
 
     /**
      * @param string $name
-     * @param array $parameters
+     * @param array $queryParameters
      * @return ResponseInterface
      * @throws \Throwable
      */
-    public function createView(string $name, array $parameters): ResponseInterface
+    public function view(string $name, array $queryParameters): ResponseInterface
     {
         $status = 200;
         $viewRequest = new ViewRequest(
-            \array_key_exists('parameters', $parameters) ? $parameters['parameters'] : [],
-            \array_key_exists('pagination', $parameters) ? $parameters['pagination'] : [],
-            $parameters['orderBy'] ?? null
+            \array_key_exists('parameters', $queryParameters) ? $queryParameters['parameters'] : [],
+            \array_key_exists('pagination', $queryParameters) ? $queryParameters['pagination'] : [],
+            $queryParameters['orderBy'] ?? null
         );
 
         try {
-            $view = $this->view->create($name, $viewRequest);
+            $view = $this->view->createView($name, $viewRequest);
 
             $data = [
                 'parameters' => $view->getParameters(),
@@ -69,17 +69,17 @@ class ComViewServer
     }
 
     /**
-     * @param array $requestData
+     * @param array $requestBody
      * @return ResponseInterface
      * @throws \Throwable
      */
-    public function executeCommand(array $requestData): ResponseInterface
+    public function execute(array $requestBody): ResponseInterface
     {
         $data = [];
-        foreach ($requestData as $id => $currentCommand) {
+        foreach ($requestBody as $id => $currentCommand) {
             $commandRequest = new CommandRequest(\array_key_exists('parameters', $data) ? $data['parameters'] : []);
             $response = $this->command->execute($currentCommand['command'], $commandRequest);
-            $data[$id] = [
+            $data[(string)$id] = [
                 'status' => $response->getStatus(),
                 'result' => $response->getResult(),
             ];
@@ -105,10 +105,7 @@ class ComViewServer
 
             return $response;
         } catch (\Throwable $exception) {
-            throw  new ServerException('An error occurred while creating the response', $code, $exception);
+            throw  new ComViewException('An error occurred while creating the response', $code, $exception);
         }
-
     }
-
-
 }

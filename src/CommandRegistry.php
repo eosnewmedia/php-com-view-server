@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Eos\ComView\Server;
 
-use Eos\ComView\Server\Exception\ServerException;
+use Eos\ComView\Server\Exception\ComViewException;
 use Eos\ComView\Server\Model\Value\CommandRequest;
 use Eos\ComView\Server\Model\Value\CommandResponse;
 
@@ -24,7 +24,7 @@ class CommandRegistry implements CommandInterface
      * @param string $name
      * @param CommandRequest $request
      * @return CommandResponse
-     * @throws ServerException
+     * @throws ComViewException
      */
     public function execute(string $name, CommandRequest $request): CommandResponse
     {
@@ -32,7 +32,7 @@ class CommandRegistry implements CommandInterface
             return $this->commands[$name]->execute($name, $request);
         }
 
-        throw new ServerException('No Command found :'.$name);
+        throw new ComViewException('No Command found :' . $name);
     }
 
     /**
@@ -40,12 +40,10 @@ class CommandRegistry implements CommandInterface
      * @param CommandInterface $command
      * @return CommandInterface
      */
-    public function addCommand(string $name, CommandInterface $command): CommandInterface
+    public function add(string $name, CommandInterface $command): CommandInterface
     {
         $this->commands[$name] = $command;
 
         return $this;
-
     }
-
 }
