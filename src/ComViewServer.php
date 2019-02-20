@@ -3,11 +3,12 @@ declare(strict_types=1);
 
 namespace Eos\ComView\Server;
 
-use Eos\ComView\Server\Model\Common\KeyValueCollection;
+use Eos\ComView\Server\Exception\ServerException;
 use Eos\ComView\Server\Model\Value\CommandRequest;
 use Eos\ComView\Server\Model\Value\ViewRequest;
-use GuzzleHttp\Psr7\Response;
+use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\StreamFactoryInterface;
 
 /**
  * @author Paul Martin Gütschow <guetschow@esonewmedia.de>
@@ -24,30 +25,29 @@ class ComViewServer
      */
     private $command;
 
+    /**
+     * @var ResponseFactoryInterface
+     */
+    private $responseFactory;
 
     /**
-     * @param ViewInterface $view
-     * @param CommandInterface $command
+     * @var StreamFactoryInterface
      */
-    public function __construct(ViewInterface $view, CommandInterface $command)
-    {
-        $this->view = $view;
-        $this->command = $command;
-    }
+    private $streamFactory;
 
 
     /**
      * @param string $name
      * @param array $parameters
      * @return ResponseInterface
+     * @throws \Throwable
      */
     public function createView(string $name, array $parameters): ResponseInterface
     {
         $status = 200;
-
         $viewRequest = new ViewRequest(
-            new KeyValueCollection(\array_key_exists('parameters', $parameters) ? $parameters['parameters'] : []),
-            new KeyValueCollection(\array_key_exists('pagination', $parameters) ? $parameters['pagination'] : []),
+            \array_key_exists('parameters', $parameters) ? $parameters['parameters'] : [],
+            \array_key_exists('pagination', $parameters) ? $parameters['pagination'] : [],
             $parameters['orderBy'] ?? null
         );
 
@@ -55,10 +55,10 @@ class ComViewServer
             $view = $this->view->create($name, $viewRequest);
 
             $data = [
-                'parameters' => $view->getParameters()->all(),
-                'pagination' => $view->getPagiantion()->all(),
+                'parameters' => $view->getParameters(),
+                'pagination' => $view->getPagiantion(),
                 'orderBy' => $view->getOrderBy(),
-                'data' => $view->getData()->all(),
+                'data' => $view->getData(),
             ];
         } catch (\Exception $exception) {
             $data = null;
@@ -71,22 +71,18 @@ class ComViewServer
     /**
      * @param array $requestData
      * @return ResponseInterface
+     * @throws \Throwable
      */
     public function executeCommand(array $requestData): ResponseInterface
     {
         $data = [];
         foreach ($requestData as $id => $currentCommand) {
-            $commandRequest = new CommandRequest(new KeyValueCollection(\array_key_exists('parameters', $data) ? $data['parameters'] : []));
-
-            try {
-                $response = $this->command->execute($currentCommand['command'], $commandRequest);
-                $data[$id] = [
-                    'status' => $response->getStatus(),
-                    'result' => $response->getResult()->all(),
-                ];
-            } catch (\Exception $exception) {
-
-            }
+            $commandRequest = new CommandRequest(\array_key_exists('parameters', $data) ? $data['parameters'] : []);
+            $response = $this->command->execute($currentCommand['command'], $commandRequest);
+            $data[$id] = [
+                'status' => $response->getStatus(),
+                'result' => $response->getResult(),
+            ];
         }
 
         return $this->generateResponse($data);
@@ -96,16 +92,22 @@ class ComViewServer
     /**
      * @param array $content
      * @param int $code
-     * @param array $headers
      * @return ResponseInterface
+     * @throws \Throwable
      */
-    private function generateResponse(array $content, int $code = 200, array $headers = ['Content-Type' => 'application/json']): ResponseInterface
+    private function generateResponse(array $content, int $code = 200): ResponseInterface
     {
-        return new Response(
-            $code,
-            $headers,
-            json_encode($content)
-        );
+        try {
+            $response = $this->responseFactory->createResponse($code);
+            $response
+                ->withBody($this->streamFactory->createStream(json_encode($content)))
+                ->withHeader('Content-Type', 'application/json');
+
+            return $response;
+        } catch (\Throwable $exception) {
+            throw  new ServerException('An error occurred while creating the response', $code, $exception);
+        }
+
     }
 
 

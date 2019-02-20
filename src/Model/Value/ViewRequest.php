@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Eos\ComView\Server\Model\Value;
 
-use Eos\ComView\Server\Model\Common\KeyValueCollectionInterface;
 
 /**
  * @author Paul Martin Gütschow <guetschow@esonewmedia.de>
@@ -12,13 +11,13 @@ class ViewRequest
 {
 
     /**
-     * @var KeyValueCollectionInterface
+     * @var array
      */
     private $parameters;
 
 
     /**
-     * @var KeyValueCollectionInterface
+     * @var array
      */
     private $pagiantion;
 
@@ -28,11 +27,11 @@ class ViewRequest
     private $orderBy;
 
     /**
-     * @param KeyValueCollectionInterface $parameters
-     * @param KeyValueCollectionInterface $pagiantion
+     * @param array $parameters
+     * @param array $pagiantion
      * @param null|string $orderBy
      */
-    public function __construct(KeyValueCollectionInterface $parameters, KeyValueCollectionInterface $pagiantion, ?string $orderBy)
+    public function __construct(array $parameters, array $pagiantion, ?string $orderBy)
     {
         $this->parameters = $parameters;
         $this->pagiantion = $pagiantion;
@@ -41,17 +40,17 @@ class ViewRequest
 
 
     /**
-     * @return KeyValueCollectionInterface
+     * @return array
      */
-    public function getParameters(): KeyValueCollectionInterface
+    public function getParameters(): array
     {
         return $this->parameters;
     }
 
     /**
-     * @return KeyValueCollectionInterface
+     * @return array
      */
-    public function getPagiantion(): KeyValueCollectionInterface
+    public function getPagiantion(): array
     {
         return $this->pagiantion;
     }

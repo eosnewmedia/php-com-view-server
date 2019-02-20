@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Eos\ComView\Server\Model\Value;
 
-use Eos\ComView\Server\Model\Common\CollectionInterface;
 
 /**
  * @author Paul Martin Gütschow <guetschow@esonewmedia.de>
@@ -16,15 +15,15 @@ class CommandResponse
     private $status;
 
     /**
-     * @var CollectionInterface
+     * @var array
      */
     private $result;
 
     /**
      * @param string $status
-     * @param CollectionInterface $result
+     * @param array $result
      */
-    public function __construct(string $status, CollectionInterface $result)
+    public function __construct(string $status, array $result)
     {
         $this->status = $status;
         $this->result = $result;
@@ -39,9 +38,9 @@ class CommandResponse
     }
 
     /**
-     * @return CollectionInterface
+     * @return array
      */
-    public function getResult(): CollectionInterface
+    public function getResult(): array
     {
         return $this->result;
     }

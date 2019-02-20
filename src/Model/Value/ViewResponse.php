@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 namespace Eos\ComView\Server\Model\Value;
 
-use Eos\ComView\Server\Model\Common\CollectionInterface;
-use Eos\ComView\Server\Model\Common\KeyValueCollectionInterface;
 
 /**
  * @author Paul Martin Gütschow <guetschow@esonewmedia.de>
@@ -12,12 +10,12 @@ use Eos\ComView\Server\Model\Common\KeyValueCollectionInterface;
 class ViewResponse
 {
     /**
-     * @var KeyValueCollectionInterface
+     * @var array
      */
     private $parameters;
 
     /**
-     * @var KeyValueCollectionInterface
+     * @var array
      */
     private $pagiantion;
 
@@ -32,16 +30,16 @@ class ViewResponse
     private $data;
 
     /**
-     * @param KeyValueCollectionInterface $parameters
-     * @param KeyValueCollectionInterface $pagiantion
+     * @param array $parameters
+     * @param array $pagiantion
      * @param null|string $orderBy
-     * @param CollectionInterface $data
+     * @param array $data
      */
     public function __construct(
-        KeyValueCollectionInterface $parameters,
-        KeyValueCollectionInterface $pagiantion,
+        array $parameters,
+        array $pagiantion,
         ?string $orderBy,
-        CollectionInterface $data
+        array $data
     ) {
         $this->parameters = $parameters;
         $this->pagiantion = $pagiantion;
@@ -50,17 +48,17 @@ class ViewResponse
     }
 
     /**
-     * @return KeyValueCollectionInterface
+     * @return array
      */
-    public function getParameters(): KeyValueCollectionInterface
+    public function getParameters(): array
     {
         return $this->parameters;
     }
 
     /**
-     * @return KeyValueCollectionInterface
+     * @return array
      */
-    public function getPagiantion(): KeyValueCollectionInterface
+    public function getPagiantion(): array
     {
         return $this->pagiantion;
     }
@@ -74,9 +72,9 @@ class ViewResponse
     }
 
     /**
-     * @return CollectionInterface
+     * @return array
      */
-    public function getData(): CollectionInterface
+    public function getData(): array
     {
         return $this->data;
     }

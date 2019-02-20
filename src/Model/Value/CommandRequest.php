@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Eos\ComView\Server\Model\Value;
 
-use Eos\ComView\Server\Model\Common\CollectionInterface;
 
 /**
  * @author Paul Martin Gütschow <guetschow@esonewmedia.de>
@@ -12,22 +11,22 @@ class CommandRequest
 {
 
     /**
-     * @var CollectionInterface
+     * @var array
      */
     private $parameters;
 
     /**
-     * @param CollectionInterface $parameters
+     * @param array $parameters
      */
-    public function __construct(CollectionInterface $parameters)
+    public function __construct(array $parameters)
     {
         $this->parameters = $parameters;
     }
 
     /**
-     * @return CollectionInterface
+     * @return array
      */
-    public function getParameters(): ?CollectionInterface
+    public function getParameters(): ?array
     {
         return $this->parameters;
     }
