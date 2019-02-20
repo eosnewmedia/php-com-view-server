@@ -10,26 +10,19 @@ Install this library via composer:
     
  # Configuration
  
- This assumes you have implemented the [PSR 17](https://www.php-fig.org/psr/psr-17) Interfaces that are passed as dependencies:
- 
-    Psr\Http\Message\ResponseFactoryInterface;
-    Psr\Http\Message\StreamFactoryInterface;
-    
  Create a new instance of `Eos\ComView\Server\ComViewServer`. This will be the entrypoint for the application.
  
  You can define single handlers for `Eos\ComView\Server\ViewInterface` and `Eos\ComView\Server\CommandInterface` or use the Registries `Eos\ComView\Server\ViewRegistry` or `Eos\ComView\Server\CommandRegistry` that implement those interfaces but can be used for multiple types.
  
  ```php
 
- $commandRegistry = new Eos\ComView\Server\CommandRegistry();
- $commandRegistry
+ $commandProcessor = new Eos\ComView\Server\CommandProcessor();
+ $commandProcessor
     ->addCommand('commandName', $command1 /*instance of Eos\ComView\Server\CommandInterface*/)
     ->addCommand('anotherName', $command2 /*instance of Eos\ComView\Server\CommandInterface*/);
 $server = new Eos\ComView\Server\ComViewServer(
                 $view,                  // instance of Eos\ComView\Server\ViewInterface
-                $commandRegistry,       
-                $psrResponseFactory, 
-                $psrStreamFactory
+                $commandProcessor
             );
 ```
 
