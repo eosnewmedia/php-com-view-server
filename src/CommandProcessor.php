@@ -5,14 +5,13 @@ declare(strict_types=1);
 namespace Eos\ComView\Server;
 
 use Eos\ComView\Server\Exception\ComViewException;
-use Eos\ComView\Server\Model\Value\CommandRequest;
 use Eos\ComView\Server\Model\Value\CommandResponse;
 
 
 /**
  * @author Paul Martin Gütschow <guetschow@esonewmedia.de>
  */
-class CommandRegistry implements CommandInterface
+class CommandProcessor implements CommandInterface
 {
 
     /**
@@ -22,14 +21,14 @@ class CommandRegistry implements CommandInterface
 
     /**
      * @param string $name
-     * @param CommandRequest $request
+     * @param array $request
      * @return CommandResponse
      * @throws ComViewException
      */
-    public function execute(string $name, CommandRequest $request): CommandResponse
+    public function process(string $name, array $request): CommandResponse
     {
         if (\array_key_exists($name, $this->commands)) {
-            return $this->commands[$name]->execute($name, $request);
+            return $this->commands[$name]->process($name, $request);
         }
 
         throw new ComViewException('No Command found :' . $name);

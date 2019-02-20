@@ -25,21 +25,21 @@ class ViewResponse
     private $orderBy;
 
     /**
-     * @var array
+     * @var array| null
      */
     private $data;
 
     /**
      * @param array $parameters
      * @param array $pagiantion
+     * @param array|null $data
      * @param null|string $orderBy
-     * @param array $data
      */
     public function __construct(
         array $parameters,
         array $pagiantion,
-        ?string $orderBy,
-        array $data
+        ?array $data = null,
+        ?string $orderBy = null
     ) {
         $this->parameters = $parameters;
         $this->pagiantion = $pagiantion;
@@ -72,9 +72,9 @@ class ViewResponse
     }
 
     /**
-     * @return array
+     * @return array|null
      */
-    public function getData(): array
+    public function getData(): ?array
     {
         return $this->data;
     }

@@ -15,15 +15,15 @@ class CommandResponse
     private $status;
 
     /**
-     * @var array
+     * @var array|null
      */
     private $result;
 
     /**
      * @param string $status
-     * @param array $result
+     * @param array|null $result
      */
-    public function __construct(string $status, array $result)
+    public function __construct(string $status, ?array $result = null)
     {
         $this->status = $status;
         $this->result = $result;
@@ -38,9 +38,9 @@ class CommandResponse
     }
 
     /**
-     * @return array
+     * @return array|null
      */
-    public function getResult(): array
+    public function getResult(): ?array
     {
         return $this->result;
     }

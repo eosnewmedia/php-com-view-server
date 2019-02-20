@@ -15,7 +15,6 @@ class ViewRequest
      */
     private $parameters;
 
-
     /**
      * @var array
      */
@@ -31,7 +30,7 @@ class ViewRequest
      * @param array $pagiantion
      * @param null|string $orderBy
      */
-    public function __construct(array $parameters, array $pagiantion, ?string $orderBy)
+    public function __construct(array $parameters, array $pagiantion, ?string $orderBy = null)
     {
         $this->parameters = $parameters;
         $this->pagiantion = $pagiantion;

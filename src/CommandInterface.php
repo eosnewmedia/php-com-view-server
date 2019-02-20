@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Eos\ComView\Server;
 
-use Eos\ComView\Server\Model\Value\CommandRequest;
 use Eos\ComView\Server\Model\Value\CommandResponse;
 
 
@@ -16,9 +15,9 @@ interface CommandInterface
 
     /**
      * @param string $name
-     * @param CommandRequest $request
+     * @param array $request
      * @return CommandResponse
      */
-    public function execute(string $name, CommandRequest $request): CommandResponse;
+    public function process(string $name, array $request): CommandResponse;
 
 }
