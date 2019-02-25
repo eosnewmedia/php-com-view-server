@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 
-namespace Eos\ComView\Server;
+namespace Eos\ComView\Server\View;
 
 use Eos\ComView\Server\Exception\ViewNotFoundException;
 use Eos\ComView\Server\Model\Value\ViewRequest;

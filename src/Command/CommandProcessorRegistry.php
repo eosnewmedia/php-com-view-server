@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 
-namespace Eos\ComView\Server;
+namespace Eos\ComView\Server\Command;
 
 use Eos\ComView\Server\Exception\CommandNotFoundException;
 use Eos\ComView\Server\Model\Value\CommandResponse;

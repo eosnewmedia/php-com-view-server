@@ -3,10 +3,14 @@ declare(strict_types=1);
 
 namespace Eos\ComView\Server;
 
+use Eos\ComView\Server\Command\CommandProcessorInterface;
 use Eos\ComView\Server\Exception\CommandNotFoundException;
 use Eos\ComView\Server\Exception\ViewNotFoundException;
+use Eos\ComView\Server\Health\CommandHealthProviderInterface;
+use Eos\ComView\Server\Health\ViewHealthProviderInterface;
 use Eos\ComView\Server\Model\Value\Response;
 use Eos\ComView\Server\Model\Value\ViewRequest;
+use Eos\ComView\Server\View\ViewInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
@@ -20,23 +24,41 @@ class ComViewServer implements LoggerAwareInterface
     use LoggerAwareTrait;
 
     /**
-     * @var ViewInterface
-     */
-    private $view;
-
-    /**
      * @var CommandProcessorInterface
      */
     private $commandProcessor;
 
     /**
-     * @param ViewInterface $view
-     * @param CommandProcessorInterface $commandProcessor
+     * @var ViewInterface
      */
-    public function __construct(ViewInterface $view, CommandProcessorInterface $commandProcessor)
-    {
-        $this->view = $view;
+    private $view;
+
+    /**
+     * @var CommandHealthProviderInterface|null
+     */
+    private $commandHealthProvider;
+
+    /**
+     * @var ViewHealthProviderInterface|null
+     */
+    private $viewHealthProvider;
+
+    /**
+     * @param CommandProcessorInterface $commandProcessor
+     * @param ViewInterface $view
+     * @param CommandHealthProviderInterface|null $commandHealthProvider
+     * @param ViewHealthProviderInterface|null $viewHealthProvider
+     */
+    public function __construct(
+        CommandProcessorInterface $commandProcessor,
+        ViewInterface $view,
+        ?CommandHealthProviderInterface $commandHealthProvider = null,
+        ?ViewHealthProviderInterface $viewHealthProvider = null
+    ) {
         $this->commandProcessor = $commandProcessor;
+        $this->view = $view;
+        $this->commandHealthProvider = $commandHealthProvider;
+        $this->viewHealthProvider = $viewHealthProvider;
     }
 
     /**
@@ -59,7 +81,6 @@ class ComViewServer implements LoggerAwareInterface
      */
     public function view(string $name, array $queryParameters): Response
     {
-        $status = 200;
         $viewRequest = new ViewRequest(
             \array_key_exists('parameters', $queryParameters) ? $queryParameters['parameters'] : [],
             \array_key_exists('pagination', $queryParameters) ? $queryParameters['pagination'] : [],
@@ -69,14 +90,15 @@ class ComViewServer implements LoggerAwareInterface
         try {
             $view = $this->view->createView($name, $viewRequest);
 
-            $data = [
-                'parameters' => $view->getParameters(),
-                'pagination' => $view->getPagination(),
-                'orderBy' => $view->getOrderBy(),
-                'data' => $view->getData(),
-            ];
-
-            return new Response($status, $data);
+            return new Response(
+                200,
+                [
+                    'parameters' => $view->getParameters(),
+                    'pagination' => $view->getPagination(),
+                    'orderBy' => $view->getOrderBy(),
+                    'data' => $view->getData(),
+                ]
+            );
         } catch (ViewNotFoundException $exception) {
             $this->getLogger()->info($exception->getMessage());
 
@@ -140,5 +162,27 @@ class ComViewServer implements LoggerAwareInterface
         }
 
         return new Response(200, $data);
+    }
+
+    /**
+     * @return Response
+     */
+    public function health(): Response
+    {
+        $viewHealth = $this->viewHealthProvider ? $this->viewHealthProvider->getViewStates() : [];
+        $commandHealth = $this->commandHealthProvider ? $this->commandHealthProvider->getCommandStates() : [];
+
+        if (\count($viewHealth) === 0 && \count($commandHealth) === 0) {
+            return new Response(404);
+        }
+
+        return new Response(
+            200,
+            [
+                'createdAt' => date(\DATE_ATOM),
+                'views' => $viewHealth,
+                'commands' => $commandHealth
+            ]
+        );
     }
 }
