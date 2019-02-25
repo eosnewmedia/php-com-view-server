@@ -3,15 +3,22 @@ declare(strict_types=1);
 
 namespace Eos\ComView\Server;
 
-use Eos\ComView\Server\Exception\ComViewException;
+use Eos\ComView\Server\Exception\CommandNotFoundException;
+use Eos\ComView\Server\Exception\ViewNotFoundException;
 use Eos\ComView\Server\Model\Value\Response;
 use Eos\ComView\Server\Model\Value\ViewRequest;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 
 /**
  * @author Paul Martin Gütschow <guetschow@esonewmedia.de>
  */
-class ComViewServer
+class ComViewServer implements LoggerAwareInterface
 {
+    use LoggerAwareTrait;
+
     /**
      * @var ViewInterface
      */
@@ -20,16 +27,28 @@ class ComViewServer
     /**
      * @var CommandProcessorInterface
      */
-    private $command;
+    private $commandProcessor;
 
     /**
      * @param ViewInterface $view
-     * @param CommandProcessorInterface $command
+     * @param CommandProcessorInterface $commandProcessor
      */
-    public function __construct(ViewInterface $view, CommandProcessorInterface $command)
+    public function __construct(ViewInterface $view, CommandProcessorInterface $commandProcessor)
     {
         $this->view = $view;
-        $this->command = $command;
+        $this->commandProcessor = $commandProcessor;
+    }
+
+    /**
+     * @return LoggerInterface
+     */
+    protected function getLogger(): LoggerInterface
+    {
+        if (!$this->logger) {
+            return new NullLogger();
+        }
+
+        return $this->logger;
     }
 
     /**
@@ -56,12 +75,24 @@ class ComViewServer
                 'orderBy' => $view->getOrderBy(),
                 'data' => $view->getData(),
             ];
-        } catch (\Throwable $exception) {
-            $data = null;
-            $status = 404;
-        }
 
-        return $this->generateResponse($status, $data);
+            return new Response($status, $data);
+        } catch (ViewNotFoundException $exception) {
+            $this->getLogger()->info($exception->getMessage());
+
+            return new Response(404);
+        } catch (\Throwable $exception) {
+            $this->getLogger()->alert(
+                $exception->getMessage(),
+                [
+                    'file' => $exception->getFile(),
+                    'line' => $exception->getLine(),
+                    'stack' => $exception->getTrace()
+                ]
+            );
+
+            return new Response(500);
+        }
     }
 
     /**
@@ -72,18 +103,35 @@ class ComViewServer
     public function execute(array $requestBody): Response
     {
         $data = [];
-        foreach ($requestBody as $id => $currentCommand) {
+
+        foreach ($requestBody as $id => $command) {
             try {
-                $response = $this->command->process(
-                    $currentCommand['command'],
-                    \array_key_exists('parameters', $currentCommand) ? $currentCommand['parameters'] : []
+                $response = $this->commandProcessor->process(
+                    $command['command'],
+                    \array_key_exists('parameters', $command) ? $command['parameters'] : []
                 );
                 $data[(string)$id] = [
                     'status' => $response->getStatus(),
                     'result' => $response->getResult(),
-                ];
 
+                ];
+            } catch (CommandNotFoundException $exception) {
+                $this->getLogger()->alert($exception->getMessage());
+
+                $data[(string)$id] = [
+                    'status' => 'ERROR',
+                    'result' => null,
+                ];
             } catch (\Throwable $exception) {
+                $this->getLogger()->error(
+                    $exception->getMessage(),
+                    [
+                        'file' => $exception->getFile(),
+                        'line' => $exception->getLine(),
+                        'stack' => $exception->getTrace()
+                    ]
+                );
+
                 $data[(string)$id] = [
                     'status' => 'ERROR',
                     'result' => null,
@@ -91,22 +139,6 @@ class ComViewServer
             }
         }
 
-        return $this->generateResponse(200, $data);
-
-    }
-
-    /**
-     * @param int $code
-     * @param array|null $content
-     * @return Response
-     * @throws ComViewException
-     */
-    private function generateResponse(int $code = 200, ?array $content = null): Response
-    {
-        try {
-            return new Response($code, json_encode($content));
-        } catch (\Throwable $exception) {
-            throw  new ComViewException('An error occurred while creating the response', $code, $exception);
-        }
+        return new Response(200, $data);
     }
 }

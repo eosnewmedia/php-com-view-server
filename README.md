@@ -1,55 +1,53 @@
-# eos/php-com-view-server
+eos/com-view-server
+=======================
 
-PHP server implementation for ComView-API. Designed as server used with [eos/php-com-view-client](https://github.com/eosnewmedia/php-com-view-client).
+PHP server implementation for ComView-API standard.
 
 # Installation
 
 Install this library via composer:
 
-    composer require eos/php-com-view-server
+    composer require eos/com-view-server
     
- # Configuration
+ # Usage
  
- Create a new instance of `Eos\ComView\Server\ComViewServer`. This will be the entrypoint for the application.
+ Create a new instance of `Eos\ComView\Server\ComViewServer`. This will be the entry point for the application.
  
- You can define single handlers for `Eos\ComView\Server\ViewInterface` and `Eos\ComView\Server\CommandInterface` or use the Registries `Eos\ComView\Server\ViewRegistry` or `Eos\ComView\Server\CommandRegistry` that implement those interfaces but can be used for multiple types.
+ You can define single handlers for `Eos\ComView\Server\ViewInterface` and `Eos\ComView\Server\CommandProcessorInterface` 
+ or use the registries `Eos\ComView\Server\ViewRegistry` and `Eos\ComView\Server\CommandProcessorRegistry` for usage with multiple views and commands.
  
  ```php
+ 
+ $view = new Eos\ComView\Server\ViewRegistry();
+ $view->add('test', new Your\View());
 
- $commandProcessor = new Eos\ComView\Server\CommandProcessor();
- $commandProcessor
-    ->addCommand('commandName', $command1 /*instance of Eos\ComView\Server\CommandInterface*/)
-    ->addCommand('anotherName', $command2 /*instance of Eos\ComView\Server\CommandInterface*/);
-$server = new Eos\ComView\Server\ComViewServer(
-                $view,                  // instance of Eos\ComView\Server\ViewInterface
-                $commandProcessor
-            );
+ $commandProcessor = new Eos\ComView\Server\CommandProcessorRegistry();
+ $commandProcessor->add('test', new Your\Command());
+ 
+ $server = new Eos\ComView\Server\ComViewServer($view, $commandProcessor);
+ 
 ```
 
-# Usage
+The `ComViewServer` class offers two methods, `view` and `execute`.
 
-This library provides 2 methods to handle view- and command-requests. They will receive the request data and will pass it to
 
-### Eos\ComView\Server\ComViewServer::view($viewName, $queryParameters)
+## view(string $viewName, array $queryParameters)
 
-`Eos\ComView\Server\ComViewServer::view($viewName, $queryParameters)` expects a string with the name of the view and an array containing the query paramaters.
-
-This method will call the Class implementing `Eos\ComView\Server\ViewInterface` that was passed in the constructor and return an instance of `Eos\ComView\Server\Value\Response` containing the status code and the result parsed as JSON.
+The `view` method expects a string with the name of the view and an array containing the query parameters from the uri.
 
  ```php
 
  $response = $server->view('viewName', $queryParameters);
+ 
 ```
 
 
-### Eos\ComView\Server\ComViewServer::execute($requestBody)
+## execute(array $requestBody)
 
-`Eos\ComView\Server\ComViewServer::execute($requestBody)` expects an array of commands with the ID as keys.
-
-This method will call the Class implementing `Eos\ComView\Server\CommandInterface` that was passed in the constructor and return an instance of `Eos\ComView\Server\Value\Response` containing the status code and the result parsed as JSON.
+The `execute` method expects an array of commands with their IDs as keys.
 
  ```php
 
  $response = $server->execute($requestBody);
-```
 
+```

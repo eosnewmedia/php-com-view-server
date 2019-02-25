@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Eos\ComView\Server;
 
-use Eos\ComView\Server\Exception\ComViewException;
+use Eos\ComView\Server\Exception\CommandNotFoundException;
 use Eos\ComView\Server\Model\Value\CommandResponse;
 
 
@@ -32,7 +32,7 @@ class CommandProcessorRegistry implements CommandProcessorInterface
      * @param string $name
      * @param array $request
      * @return CommandResponse
-     * @throws ComViewException
+     * @throws CommandNotFoundException
      */
     public function process(string $name, array $request): CommandResponse
     {
@@ -40,6 +40,6 @@ class CommandProcessorRegistry implements CommandProcessorInterface
             return $this->commands[$name]->process($name, $request);
         }
 
-        throw new ComViewException('Command ' . $name . ' not found.');
+        throw new CommandNotFoundException('Command ' . $name . ' not found.');
     }
 }

@@ -15,15 +15,15 @@ class Response
     private $status;
 
     /**
-     * @var string
+     * @var array
      */
     private $body;
 
     /**
      * @param int $status
-     * @param string $body
+     * @param array $body
      */
-    public function __construct(int $status, string $body)
+    public function __construct(int $status, array $body = [])
     {
         $this->status = $status;
         $this->body = $body;
@@ -38,9 +38,9 @@ class Response
     }
 
     /**
-     * @return string
+     * @return array
      */
-    public function getBody(): string
+    public function getBody(): array
     {
         return $this->body;
     }
