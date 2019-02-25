@@ -17,7 +17,7 @@ class ViewResponse
     /**
      * @var array
      */
-    private $pagiantion;
+    private $pagination;
 
     /**
      * @var string|null
@@ -31,18 +31,18 @@ class ViewResponse
 
     /**
      * @param array $parameters
-     * @param array $pagiantion
+     * @param array $pagination
      * @param array|null $data
      * @param null|string $orderBy
      */
     public function __construct(
-        array $parameters,
-        array $pagiantion,
+        array $parameters = [],
+        array $pagination = [],
         ?array $data = null,
         ?string $orderBy = null
     ) {
         $this->parameters = $parameters;
-        $this->pagiantion = $pagiantion;
+        $this->pagination = $pagination;
         $this->orderBy = $orderBy;
         $this->data = $data;
     }
@@ -58,17 +58,9 @@ class ViewResponse
     /**
      * @return array
      */
-    public function getPagiantion(): array
+    public function getPagination(): array
     {
-        return $this->pagiantion;
-    }
-
-    /**
-     * @return null|string
-     */
-    public function getOrderBy(): ?string
-    {
-        return $this->orderBy;
+        return $this->pagination;
     }
 
     /**
@@ -79,5 +71,11 @@ class ViewResponse
         return $this->data;
     }
 
-
+    /**
+     * @return null|string
+     */
+    public function getOrderBy(): ?string
+    {
+        return $this->orderBy;
+    }
 }

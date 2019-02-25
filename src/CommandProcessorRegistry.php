@@ -11,13 +11,22 @@ use Eos\ComView\Server\Model\Value\CommandResponse;
 /**
  * @author Paul Martin Gütschow <guetschow@esonewmedia.de>
  */
-class CommandProcessor implements CommandInterface
+class CommandProcessorRegistry implements CommandProcessorInterface
 {
-
     /**
-     * @var CommandInterface[]
+     * @var CommandProcessorInterface[]
      */
     private $commands = [];
+
+    /**
+     * @param string $name
+     * @param CommandProcessorInterface $command
+     * @return void
+     */
+    public function add(string $name, CommandProcessorInterface $command): void
+    {
+        $this->commands[$name] = $command;
+    }
 
     /**
      * @param string $name
@@ -31,18 +40,6 @@ class CommandProcessor implements CommandInterface
             return $this->commands[$name]->process($name, $request);
         }
 
-        throw new ComViewException('No Command found :' . $name);
-    }
-
-    /**
-     * @param string $name
-     * @param CommandInterface $command
-     * @return CommandInterface
-     */
-    public function add(string $name, CommandInterface $command): CommandInterface
-    {
-        $this->commands[$name] = $command;
-
-        return $this;
+        throw new ComViewException('Command ' . $name . ' not found.');
     }
 }

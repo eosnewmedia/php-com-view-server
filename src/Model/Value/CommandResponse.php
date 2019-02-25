@@ -44,6 +44,4 @@ class CommandResponse
     {
         return $this->result;
     }
-
-
 }

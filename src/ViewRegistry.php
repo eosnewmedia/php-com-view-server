@@ -14,11 +14,20 @@ use Eos\ComView\Server\Model\Value\ViewResponse;
  */
 class ViewRegistry implements ViewInterface
 {
-
     /**
      * @var ViewInterface[]
      */
     private $views = [];
+
+    /**
+     * @param string $name
+     * @param ViewInterface $view
+     * @return void
+     */
+    public function add(string $name, ViewInterface $view): void
+    {
+        $this->views[$name] = $view;
+    }
 
     /**
      * @param string $name
@@ -32,18 +41,6 @@ class ViewRegistry implements ViewInterface
             return $this->views[$name]->createView($name, $request);
         }
 
-        throw new ComViewException('No View found :' . $name);
-    }
-
-    /**
-     * @param string $name
-     * @param ViewInterface $view
-     * @return ViewInterface
-     */
-    public function add(string $name, ViewInterface $view): ViewInterface
-    {
-        $this->views[$name] = $view;
-
-        return $this;
+        throw new ComViewException('View ' . $name . ' not found.');
     }
 }

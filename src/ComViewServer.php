@@ -18,10 +18,19 @@ class ComViewServer
     private $view;
 
     /**
-     * @var CommandInterface
+     * @var CommandProcessorInterface
      */
     private $command;
 
+    /**
+     * @param ViewInterface $view
+     * @param CommandProcessorInterface $command
+     */
+    public function __construct(ViewInterface $view, CommandProcessorInterface $command)
+    {
+        $this->view = $view;
+        $this->command = $command;
+    }
 
     /**
      * @param string $name
@@ -43,7 +52,7 @@ class ComViewServer
 
             $data = [
                 'parameters' => $view->getParameters(),
-                'pagination' => $view->getPagiantion(),
+                'pagination' => $view->getPagination(),
                 'orderBy' => $view->getOrderBy(),
                 'data' => $view->getData(),
             ];
@@ -85,7 +94,6 @@ class ComViewServer
         return $this->generateResponse(200, $data);
 
     }
-
 
     /**
      * @param int $code

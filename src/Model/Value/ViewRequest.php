@@ -9,7 +9,6 @@ namespace Eos\ComView\Server\Model\Value;
  */
 class ViewRequest
 {
-
     /**
      * @var array
      */
@@ -18,7 +17,7 @@ class ViewRequest
     /**
      * @var array
      */
-    private $pagiantion;
+    private $pagination;
 
     /**
      * @var string|null
@@ -27,16 +26,15 @@ class ViewRequest
 
     /**
      * @param array $parameters
-     * @param array $pagiantion
+     * @param array $pagination
      * @param null|string $orderBy
      */
-    public function __construct(array $parameters, array $pagiantion, ?string $orderBy = null)
+    public function __construct(array $parameters = [], array $pagination = [], ?string $orderBy = null)
     {
         $this->parameters = $parameters;
-        $this->pagiantion = $pagiantion;
+        $this->pagination = $pagination;
         $this->orderBy = $orderBy;
     }
-
 
     /**
      * @return array
@@ -49,9 +47,9 @@ class ViewRequest
     /**
      * @return array
      */
-    public function getPagiantion(): array
+    public function getPagination(): array
     {
-        return $this->pagiantion;
+        return $this->pagination;
     }
 
     /**
@@ -61,6 +59,4 @@ class ViewRequest
     {
         return $this->orderBy;
     }
-
-
 }

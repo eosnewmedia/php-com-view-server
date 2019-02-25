@@ -9,7 +9,6 @@ namespace Eos\ComView\Server\Model\Value;
  */
 class Response
 {
-
     /**
      * @var int
      */
@@ -45,6 +44,4 @@ class Response
     {
         return $this->body;
     }
-
-
 }
