@@ -3,17 +3,21 @@ declare(strict_types=1);
 
 namespace Eos\ComView\Server\Exception;
 
+use Throwable;
+
 /**
  * @author Philipp Marien <marien@eosnewmedia.de>
  */
-class CommandNotFoundException extends ComViewException
+class InvalidRequestException extends ComViewException
 {
     /**
-     * @param string $name
+     * @param string $message
+     * @param int $code
+     * @param Throwable $previous
      */
-    public function __construct(string $name)
+    public function __construct(string $message = 'Invalid request!', int $code = 0, Throwable $previous = null)
     {
-        parent::__construct('Command "' . $name . '" not found.');
+        parent::__construct($message, $code, $previous);
     }
 
     /**
@@ -29,6 +33,6 @@ class CommandNotFoundException extends ComViewException
      */
     public function getHttpStatus(): int
     {
-        return 404;
+        return 400;
     }
 }
