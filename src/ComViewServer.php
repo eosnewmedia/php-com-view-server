@@ -4,8 +4,7 @@ declare(strict_types=1);
 namespace Eos\ComView\Server;
 
 use Eos\ComView\Server\Command\CommandProcessorInterface;
-use Eos\ComView\Server\Exception\CommandNotFoundException;
-use Eos\ComView\Server\Exception\ViewNotFoundException;
+use Eos\ComView\Server\Exception\ComViewException;
 use Eos\ComView\Server\Health\CommandHealthProviderInterface;
 use Eos\ComView\Server\Health\ViewHealthProviderInterface;
 use Eos\ComView\Server\Model\Value\Response;
@@ -99,12 +98,31 @@ class ComViewServer implements LoggerAwareInterface
                     'data' => $view->getData(),
                 ]
             );
-        } catch (ViewNotFoundException $exception) {
-            $this->getLogger()->info($exception->getMessage());
+        } catch (ComViewException $exception) {
+            if ($exception->isCritical()) {
+                $this->getLogger()->critical(
+                    $exception->getMessage(),
+                    [
+                        'status' => $exception->getHttpStatus(),
+                        'error' => $exception->getError(),
+                        'file' => $exception->getFile(),
+                        'line' => $exception->getLine(),
+                        'stack' => $exception->getTrace()
+                    ]
+                );
+            } else {
+                $this->getLogger()->info(
+                    $exception->getMessage(),
+                    [
+                        'status' => $exception->getHttpStatus(),
+                        'error' => $exception->getError()
+                    ]
+                );
+            }
 
-            return new Response(404);
+            return new Response($exception->getHttpStatus(), $exception->getError());
         } catch (\Throwable $exception) {
-            $this->getLogger()->alert(
+            $this->getLogger()->emergency(
                 $exception->getMessage(),
                 [
                     'file' => $exception->getFile(),
@@ -137,15 +155,34 @@ class ComViewServer implements LoggerAwareInterface
                     'result' => $response->getResult(),
 
                 ];
-            } catch (CommandNotFoundException $exception) {
-                $this->getLogger()->alert($exception->getMessage());
+            } catch (ComViewException $exception) {
+                if ($exception->isCritical()) {
+                    $this->getLogger()->critical(
+                        $exception->getMessage(),
+                        [
+                            'status' => $exception->getHttpStatus(),
+                            'error' => $exception->getError(),
+                            'file' => $exception->getFile(),
+                            'line' => $exception->getLine(),
+                            'stack' => $exception->getTrace()
+                        ]
+                    );
+                } else {
+                    $this->getLogger()->info(
+                        $exception->getMessage(),
+                        [
+                            'status' => $exception->getHttpStatus(),
+                            'error' => $exception->getError()
+                        ]
+                    );
+                }
 
                 $data[(string)$id] = [
                     'status' => 'ERROR',
-                    'result' => null,
+                    'result' => $exception->getError(),
                 ];
             } catch (\Throwable $exception) {
-                $this->getLogger()->error(
+                $this->getLogger()->emergency(
                     $exception->getMessage(),
                     [
                         'file' => $exception->getFile(),
