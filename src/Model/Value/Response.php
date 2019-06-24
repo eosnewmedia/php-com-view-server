@@ -20,13 +20,20 @@ class Response
     private $body;
 
     /**
+     * @var string[][]
+     */
+    private $headers;
+
+    /**
      * @param int $status
+     * @param string[][] $headers
      * @param array|null $body
      */
-    public function __construct(int $status, ?array $body = null)
+    public function __construct(int $status, array $headers = [], ?array $body = null)
     {
         $this->status = $status;
         $this->body = $body;
+        $this->headers = $headers;
     }
 
     /**
@@ -43,5 +50,13 @@ class Response
     public function getBody(): ?array
     {
         return $this->body;
+    }
+
+    /**
+     * @return string[][]
+     */
+    public function getHeaders(): array
+    {
+        return $this->headers;
     }
 }

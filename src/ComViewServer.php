@@ -7,6 +7,7 @@ use Eos\ComView\Server\Command\CommandProcessorInterface;
 use Eos\ComView\Server\Exception\ComViewException;
 use Eos\ComView\Server\Health\CommandHealthProviderInterface;
 use Eos\ComView\Server\Health\ViewHealthProviderInterface;
+use Eos\ComView\Server\Model\Value\CommandRequest;
 use Eos\ComView\Server\Model\Value\Response;
 use Eos\ComView\Server\Model\Value\ViewRequest;
 use Eos\ComView\Server\View\ViewInterface;
@@ -74,13 +75,14 @@ class ComViewServer implements LoggerAwareInterface
 
     /**
      * @param string $name
+     * @param array $headers
      * @param array $queryParameters
      * @return Response
      * @throws \Throwable
      */
-    public function view(string $name, array $queryParameters): Response
+    public function view(string $name, array $headers, array $queryParameters): Response
     {
-        $viewRequest = new ViewRequest(
+        $viewRequest = new ViewRequest($headers,
             \array_key_exists('parameters', $queryParameters) ? $queryParameters['parameters'] : [],
             \array_key_exists('pagination', $queryParameters) ? $queryParameters['pagination'] : [],
             $queryParameters['orderBy'] ?? null
@@ -91,6 +93,7 @@ class ComViewServer implements LoggerAwareInterface
 
             return new Response(
                 200,
+                $view->getHeaders(),
                 [
                     'parameters' => $view->getParameters(),
                     'pagination' => $view->getPagination(),
@@ -137,10 +140,11 @@ class ComViewServer implements LoggerAwareInterface
 
     /**
      * @param array $requestBody
+     * @param array $headers
      * @return Response
      * @throws \Throwable
      */
-    public function execute(array $requestBody): Response
+    public function execute(array $requestBody, array $headers = []): Response
     {
         $data = [];
 
@@ -148,7 +152,10 @@ class ComViewServer implements LoggerAwareInterface
             try {
                 $response = $this->commandProcessor->process(
                     $command['command'],
-                    \array_key_exists('parameters', $command) ? $command['parameters'] : []
+                    new CommandRequest(
+                        $headers,
+                        \array_key_exists('parameters', $command) ? $command['parameters'] : []
+                    )
                 );
                 $data[(string)$id] = [
                     'status' => $response->getStatus(),
