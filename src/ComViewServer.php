@@ -8,7 +8,7 @@ use Eos\ComView\Server\Exception\ComViewException;
 use Eos\ComView\Server\Health\CommandHealthProviderInterface;
 use Eos\ComView\Server\Health\ViewHealthProviderInterface;
 use Eos\ComView\Server\Model\Value\CommandRequest;
-use Eos\ComView\Server\Model\Value\Response;
+use Eos\ComView\Server\Model\Value\HttpResponse;
 use Eos\ComView\Server\Model\Value\ViewRequest;
 use Eos\ComView\Server\View\ViewInterface;
 use Psr\Log\LoggerAwareInterface;
@@ -77,12 +77,13 @@ class ComViewServer implements LoggerAwareInterface
      * @param string $name
      * @param array $headers
      * @param array $queryParameters
-     * @return Response
+     * @return HttpResponse
      * @throws \Throwable
      */
-    public function view(string $name, array $headers, array $queryParameters): Response
+    public function view(string $name, array $headers, array $queryParameters): HttpResponse
     {
-        $viewRequest = new ViewRequest($headers,
+        $viewRequest = new ViewRequest(
+            $headers,
             \array_key_exists('parameters', $queryParameters) ? $queryParameters['parameters'] : [],
             \array_key_exists('pagination', $queryParameters) ? $queryParameters['pagination'] : [],
             $queryParameters['orderBy'] ?? null
@@ -91,7 +92,7 @@ class ComViewServer implements LoggerAwareInterface
         try {
             $view = $this->view->createView($name, $viewRequest);
 
-            return new Response(
+            return new HttpResponse(
                 200,
                 $view->getHeaders(),
                 [
@@ -123,7 +124,7 @@ class ComViewServer implements LoggerAwareInterface
                 );
             }
 
-            return new Response($exception->getHttpStatus(), $exception->getError());
+            return new HttpResponse($exception->getHttpStatus(), $exception->getError());
         } catch (\Throwable $exception) {
             $this->getLogger()->emergency(
                 $exception->getMessage(),
@@ -134,20 +135,19 @@ class ComViewServer implements LoggerAwareInterface
                 ]
             );
 
-            return new Response(500);
+            return new HttpResponse(500);
         }
     }
 
     /**
-     * @param array $requestBody
      * @param array $headers
-     * @return Response
+     * @param array $requestBody
+     * @return HttpResponse
      * @throws \Throwable
      */
-    public function execute(array $requestBody, array $headers = []): Response
+    public function execute(array $headers, array $requestBody): HttpResponse
     {
         $data = [];
-
         foreach ($requestBody as $id => $command) {
             try {
                 $response = $this->commandProcessor->process(
@@ -205,22 +205,22 @@ class ComViewServer implements LoggerAwareInterface
             }
         }
 
-        return new Response(200, $data);
+        return new HttpResponse(200, $data);
     }
 
     /**
-     * @return Response
+     * @return HttpResponse
      */
-    public function health(): Response
+    public function health(): HttpResponse
     {
         $viewHealth = $this->viewHealthProvider ? $this->viewHealthProvider->getViewStates() : [];
         $commandHealth = $this->commandHealthProvider ? $this->commandHealthProvider->getCommandStates() : [];
 
         if (\count($viewHealth) === 0 && \count($commandHealth) === 0) {
-            return new Response(404);
+            return new HttpResponse(404);
         }
 
-        return new Response(
+        return new HttpResponse(
             200,
             [
                 'createdAt' => date(\DATE_ATOM),

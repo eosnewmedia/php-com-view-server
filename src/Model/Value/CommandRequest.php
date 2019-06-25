@@ -12,6 +12,7 @@ class CommandRequest
      * @var string[][]
      */
     private $headers;
+
     /**
      * @var array
      */
