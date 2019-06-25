@@ -39,7 +39,7 @@ The `view` method expects a string with the name of the view and an array contai
 
  ```php
 
- $response = $server->view('viewName', $queryParameters);
+ $response = $server->view('viewName', $headers, $queryParameters);
  
 ```
 
@@ -49,7 +49,7 @@ The `execute` method expects an array of commands (the ComView request body) wit
 
  ```php
 
- $response = $server->execute($requestBody);
+ $response = $server->execute($headers, $requestBody);
 
 ```
 

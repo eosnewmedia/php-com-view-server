@@ -7,12 +7,17 @@ namespace Eos\ComView\Server\Model\Value;
 /**
  * @author Paul Martin Gütschow <guetschow@esonewmedia.de>
  */
-class Response
+class HttpResponse
 {
     /**
      * @var int
      */
     private $status;
+
+    /**
+     * @var string[][]
+     */
+    private $headers;
 
     /**
      * @var array|null
@@ -21,12 +26,14 @@ class Response
 
     /**
      * @param int $status
+     * @param string[][] $headers
      * @param array|null $body
      */
-    public function __construct(int $status, ?array $body = null)
+    public function __construct(int $status, array $headers = [], ?array $body = null)
     {
         $this->status = $status;
         $this->body = $body;
+        $this->headers = $headers;
     }
 
     /**
@@ -35,6 +42,14 @@ class Response
     public function getStatus(): int
     {
         return $this->status;
+    }
+
+    /**
+     * @return string[][]
+     */
+    public function getHeaders(): array
+    {
+        return $this->headers;
     }
 
     /**

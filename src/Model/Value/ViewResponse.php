@@ -10,6 +10,11 @@ namespace Eos\ComView\Server\Model\Value;
 class ViewResponse
 {
     /**
+     * @var string[][]
+     */
+    private $headers;
+
+    /**
      * @var array
      */
     private $parameters;
@@ -30,21 +35,32 @@ class ViewResponse
     private $data;
 
     /**
+     * @param string[][] $headers
      * @param array $parameters
      * @param array $pagination
      * @param array|null $data
      * @param null|string $orderBy
      */
     public function __construct(
+        array $headers = [],
         array $parameters = [],
         array $pagination = [],
         ?array $data = null,
         ?string $orderBy = null
     ) {
+        $this->headers = $headers;
         $this->parameters = $parameters;
         $this->pagination = $pagination;
         $this->orderBy = $orderBy;
         $this->data = $data;
+    }
+
+    /**
+     * @return string[][]
+     */
+    public function getHeaders(): array
+    {
+        return $this->headers;
     }
 
     /**
