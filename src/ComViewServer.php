@@ -15,6 +15,7 @@ use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use Throwable;
 
 /**
  * @author Paul Martin Gütschow <guetschow@esonewmedia.de>
@@ -78,14 +79,14 @@ class ComViewServer implements LoggerAwareInterface
      * @param array $headers
      * @param array $queryParameters
      * @return HttpResponse
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function view(string $name, array $headers, array $queryParameters): HttpResponse
     {
         $viewRequest = new ViewRequest(
             $headers,
-            \array_key_exists('parameters', $queryParameters) ? $queryParameters['parameters'] : [],
-            \array_key_exists('pagination', $queryParameters) ? $queryParameters['pagination'] : [],
+            array_key_exists('parameters', $queryParameters) ? $queryParameters['parameters'] : [],
+            array_key_exists('pagination', $queryParameters) ? $queryParameters['pagination'] : [],
             $queryParameters['orderBy'] ?? null
         );
 
@@ -124,8 +125,8 @@ class ComViewServer implements LoggerAwareInterface
                 );
             }
 
-            return new HttpResponse($exception->getHttpStatus(), $exception->getError());
-        } catch (\Throwable $exception) {
+            return new HttpResponse($exception->getHttpStatus(), [], $exception->getError());
+        } catch (Throwable $exception) {
             $this->getLogger()->emergency(
                 $exception->getMessage(),
                 [
@@ -143,7 +144,7 @@ class ComViewServer implements LoggerAwareInterface
      * @param array $headers
      * @param array $requestBody
      * @return HttpResponse
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function execute(array $headers, array $requestBody): HttpResponse
     {
@@ -154,7 +155,7 @@ class ComViewServer implements LoggerAwareInterface
                     $command['command'],
                     new CommandRequest(
                         $headers,
-                        \array_key_exists('parameters', $command) ? $command['parameters'] : []
+                        array_key_exists('parameters', $command) ? $command['parameters'] : []
                     )
                 );
                 $data[(string)$id] = [
@@ -188,7 +189,7 @@ class ComViewServer implements LoggerAwareInterface
                     'status' => 'ERROR',
                     'result' => $exception->getError(),
                 ];
-            } catch (\Throwable $exception) {
+            } catch (Throwable $exception) {
                 $this->getLogger()->emergency(
                     $exception->getMessage(),
                     [
@@ -205,7 +206,7 @@ class ComViewServer implements LoggerAwareInterface
             }
         }
 
-        return new HttpResponse(200, $data);
+        return new HttpResponse(200, [], $data);
     }
 
     /**
@@ -216,14 +217,15 @@ class ComViewServer implements LoggerAwareInterface
         $viewHealth = $this->viewHealthProvider ? $this->viewHealthProvider->getViewStates() : [];
         $commandHealth = $this->commandHealthProvider ? $this->commandHealthProvider->getCommandStates() : [];
 
-        if (\count($viewHealth) === 0 && \count($commandHealth) === 0) {
+        if (count($viewHealth) === 0 && count($commandHealth) === 0) {
             return new HttpResponse(404);
         }
 
         return new HttpResponse(
             200,
+            [],
             [
-                'createdAt' => date(\DATE_ATOM),
+                'createdAt' => date(DATE_ATOM),
                 'views' => $viewHealth,
                 'commands' => $commandHealth
             ]
