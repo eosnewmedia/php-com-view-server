@@ -8,6 +8,7 @@ use Eos\ComView\Server\Exception\ComViewException;
 use Eos\ComView\Server\Health\CommandHealthProviderInterface;
 use Eos\ComView\Server\Health\ViewHealthProviderInterface;
 use Eos\ComView\Server\Model\Value\CommandRequest;
+use Eos\ComView\Server\Model\Value\CommandResponse;
 use Eos\ComView\Server\Model\Value\HttpResponse;
 use Eos\ComView\Server\Model\Value\ViewRequest;
 use Eos\ComView\Server\View\ViewInterface;
@@ -186,7 +187,7 @@ class ComViewServer implements LoggerAwareInterface
                 }
 
                 $data[(string)$id] = [
-                    'status' => 'ERROR',
+                    'status' => CommandResponse::STATUS_ERROR,
                     'result' => $exception->getError(),
                 ];
             } catch (Throwable $exception) {
@@ -200,7 +201,7 @@ class ComViewServer implements LoggerAwareInterface
                 );
 
                 $data[(string)$id] = [
-                    'status' => 'ERROR',
+                    'status' => CommandResponse::STATUS_ERROR,
                     'result' => null,
                 ];
             }

@@ -9,6 +9,9 @@ namespace Eos\ComView\Server\Model\Value;
  */
 class CommandResponse
 {
+    public const STATUS_SUCCESS = 'SUCCESS';
+    public const STATUS_ERROR = 'ERROR';
+
     /**
      * @var string
      */
